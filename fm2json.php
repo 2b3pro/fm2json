@@ -11,7 +11,10 @@
  */
 
 	$debug = false;
-	define('FILEMAKER_XMLPATH', 'http://server.msaeigo.com/fmi/xml/fmresultset.xml');
+	/**
+	 * 		CONFIGURATION -- set MYHOSTNAME to your server
+	 */
+	define('FILEMAKER_XMLPATH', 'http://MYHOSTNAME/fmi/xml/fmresultset.xml');
 
 	function curl_get_file_contents($URL)
     {
