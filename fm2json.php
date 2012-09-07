@@ -10,12 +10,34 @@
  * @copyright  2012 2b3 Productions
  */
 
-	$debug = false;
 	/**
-	 * 		CONFIGURATION -- set MYHOSTNAME to your server
+	 * CONFIGURATION
+	 * 
+	 * @param {String} SCHEME  (http, https)
+	 * @param {String} HOST_PORT  (myServer.com:8080)
+	 * @param {String} XMP-GRAMMAR  (fmresultset, FMPXMLRESULT, or FMPXMLLAYOUT)
 	 */
-	define('FILEMAKER_XMLPATH', 'http://MYHOSTNAME/fmi/xml/fmresultset.xml');
+	define('HOST_PORT', 'XXXXX'); // default :80
+	define('SCHEME', 'http');
+	define('XMP_GRAMMAR', 'fmresultset'); 
+	
+	// ============================================
 
+		$debug = false;
+	
+	if ($debug) {
+	    if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
+	        error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+	    } else {
+	        error_reporting(E_ALL & ~E_NOTICE);
+	    }   
+	} else {
+		error_reporting(0);
+	}
+	
+	$query = $_SERVER["QUERY_STRING"]; 
+	//$query = str_replace("-sortfield_", "-sortfield.", http_build_query($_GET)); 
+	
 	function curl_get_file_contents($URL)
     {
         $c = curl_init();
@@ -28,19 +50,7 @@
             else return FALSE;
     }
 	
-	if ($debug) {
-	    if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
-	        error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
-	    } else {
-	        error_reporting(E_ALL & ~E_NOTICE);
-	    }   
-	} else {
-		error_reporting(0);
-	}
-
-	//$query = str_replace("-sortfield_", "-sortfield.", http_build_query($_GET)); 
-	$query = $_SERVER["QUERY_STRING"]; 
-	$filename = FILEMAKER_XMLPATH."?".$query;
+	$filename = SCHEME."://".HOST_PORT."/fmi/xml/".XMP_GRAMMAR.".xml?".$query;
 	$xml = curl_get_file_contents($filename);
 	$dom = new DOMDocument; $dom->loadXML($xml);
 	$s = simplexml_import_dom($dom);
