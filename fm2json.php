@@ -77,7 +77,6 @@
 	    		$fmjson["resultset"]["records"][$idx][$c] = (string)$d;
 			}
 	    }
-		$fmjson["resultset"]["records"][$idx]["fields"] = array();
 		$fs = $s->resultset->record[$idx]->field;
 		for ($i=0; $i< count($fs); $i++){
 			$key = $s->resultset->record[$idx]->field[$i]->attributes();
@@ -93,10 +92,11 @@
 			/**
 			 * 	Process Records (RelatedSet) Attributes
 			 */
-			$fmjson["resultset"]["records"][$idx]["relatedset"] = array();
 			$rsnode = $s->resultset->record[$idx]->relatedset;
-			foreach ($rsnode->attributes() as $c => $d) {
-	    		$fmjson["resultset"]["records"][$idx]["relatedset"][$c] = (string)$rsnode->attributes()->$c;
+			if (is_object($rsnode)) {
+				foreach ($rsnode->attributes() as $c => $d) {
+		    		$fmjson["resultset"]["records"][$idx]["relatedset"][$c] = (string)$rsnode->attributes()->$c;
+				}
 			}
 			/**
 			 * 	Process Records under RelatedSet
@@ -106,7 +106,6 @@
 	    			$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2][$g] = (string)$h;
 				}		
 				// Process the fields
-				$fmjson["resultset"]["records"][$idx]["relatedset"]["records"]["fields"] = array();
 				$rs = $s->resultset->record[$idx]->relatedset->record[$idx2]->field;
 				for ($ii=0; $ii< count($rs); $ii++){
 					$key = $s->resultset->record[$idx]->relatedset->record[$idx2]->field[$ii]->attributes();
@@ -120,7 +119,7 @@
 	}
 
 	$json = json_encode( $fmjson );
-	$replacedString = preg_replace("/\\\\u([0-9abcdef]{4,})/", "&#x$1;", $json);
+	$replacedString = preg_replace("/\\\\u([0-9a-f]{4})/", "&#x$1;", $json);
 	$unicodeString = mb_convert_encoding($replacedString, 'UTF-8', 'HTML-ENTITIES');
 	$unicodeString = stripslashes($unicodeString);
 	
