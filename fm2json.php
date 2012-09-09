@@ -10,6 +10,8 @@
  * @copyright  2012 2b3 Productions
  */
 
+ 
+ini_set("default_charset", "UTF-8");
 	/**
 	 * CONFIGURATION
 	 * 
@@ -17,7 +19,7 @@
 	 * @param {String} HOST_PORT  (myServer.com:8080)
 	 * @param {String} XMP-GRAMMAR  (fmresultset, FMPXMLRESULT, or FMPXMLLAYOUT)
 	 */
-	define('HOST_PORT', 'XXXXX'); // default :80
+	define('HOST_PORT', 'XXXXX.com'); // default :80
 	define('SCHEME', 'http');
 	define('XMP_GRAMMAR', 'fmresultset'); 
 	
@@ -50,8 +52,8 @@
             else return FALSE;
     }
 	
-	$filename = SCHEME."://".HOST_PORT."/fmi/xml/".XMP_GRAMMAR.".xml?".$query;
-	$xml = curl_get_file_contents($filename);
+	$file = SCHEME."://".HOST_PORT."/fmi/xml/".XMP_GRAMMAR.".xml?".$query;
+	$xml = curl_get_file_contents($file);
 	$dom = new DOMDocument; $dom->loadXML($xml);
 	$s = simplexml_import_dom($dom);
 	
@@ -77,11 +79,14 @@
 	    		$fmjson["resultset"]["records"][$idx][$c] = (string)$d;
 			}
 	    }
+		//$fmjson["resultset"]["records"][$idx]["fields"] = array();
 		$fs = $s->resultset->record[$idx]->field;
+				//var_dump($s->resultset->record[$idx]); exit;
 		for ($i=0; $i< count($fs); $i++){
 			$key = $s->resultset->record[$idx]->field[$i]->attributes();
-			$data = $s->resultset->record[$idx]->field[$i]->data;
-			$fmjson["resultset"]["records"][$idx]["fields"][(string)$key] = array ( htmlspecialchars($data) );
+			foreach ( $s->resultset->record[$idx]->field[$i]->children() as $data) {
+				$fmjson["resultset"]["records"][$idx]["fields"][(string)$key][] = htmlspecialchars($data);
+			}
 		}
 		
 		/**
@@ -93,10 +98,9 @@
 			 * 	Process Records (RelatedSet) Attributes
 			 */
 			$rsnode = $s->resultset->record[$idx]->relatedset;
-			if (is_object($rsnode)) {
-				foreach ($rsnode->attributes() as $c => $d) {
-		    		$fmjson["resultset"]["records"][$idx]["relatedset"][$c] = (string)$rsnode->attributes()->$c;
-				}
+			//$fmjson["resultset"]["records"][$idx]["relatedset"] = array();
+			foreach ($rsnode->attributes() as $c => $d) {
+	    		$fmjson["resultset"]["records"][$idx]["relatedset"][$c] = (string)$rsnode->attributes()->$c;
 			}
 			/**
 			 * 	Process Records under RelatedSet
@@ -106,11 +110,12 @@
 	    			$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2][$g] = (string)$h;
 				}		
 				// Process the fields
+				//$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2]["fields"] = array();
 				$rs = $s->resultset->record[$idx]->relatedset->record[$idx2]->field;
 				for ($ii=0; $ii< count($rs); $ii++){
 					$key = $s->resultset->record[$idx]->relatedset->record[$idx2]->field[$ii]->attributes();
 					$data = $s->resultset->record[$idx]->relatedset->record[$idx2]->field[$ii]->data;
-					$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2]["fields"][(string)$key] = array ( htmlspecialchars($data) );
+					$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2]["fields"][(string)$key][] = htmlspecialchars($data);
 				}
 				$idx2++;
 			}
