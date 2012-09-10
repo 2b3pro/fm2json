@@ -85,7 +85,7 @@ ini_set("default_charset", "UTF-8");
 		for ($i=0; $i< count($fs); $i++){
 			$key = $s->resultset->record[$idx]->field[$i]->attributes();
 			foreach ( $s->resultset->record[$idx]->field[$i]->children() as $data) {
-				$fmjson["resultset"]["records"][$idx]["fields"][(string)$key][] = htmlspecialchars($data);
+				$fmjson["resultset"]["records"][$idx]["fields"][(string)$key][] = htmlspecialchars(addslashes($data));
 			}
 		}
 		
@@ -115,7 +115,7 @@ ini_set("default_charset", "UTF-8");
 				for ($ii=0; $ii< count($rs); $ii++){
 					$key = $s->resultset->record[$idx]->relatedset->record[$idx2]->field[$ii]->attributes();
 					$data = $s->resultset->record[$idx]->relatedset->record[$idx2]->field[$ii]->data;
-					$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2]["fields"][(string)$key][] = htmlspecialchars($data);
+					$fmjson["resultset"]["records"][$idx]["relatedset"]["records"][$idx2]["fields"][(string)$key][] = htmlspecialchars(addslashes($data));
 				}
 				$idx2++;
 			}
